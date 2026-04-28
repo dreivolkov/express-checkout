@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout</title>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <div class="max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8">
+    <div class="flex flex-col lg:flex-row lg:items-start gap-8 xl:gap-16 lg:py-12">
+
+      <!-- Left: Price Summary -->
+      <div class="w-full lg:w-[500px] space-y-6">
+        <div class="space-y-4">
+          <h5 class="text-[#00BCFF] font-semibold text-sm uppercase tracking-wide" id="company-name">
+            tailwind
+          </h5>
+
+          <div>
+            <h3 class="text-4xl font-bold text-gray-900" id="total-price">$0.00</h3>
+            <h4 class="text-sm text-gray-500 mt-1">due today</h4>
+          </div>
+
+          <p class="text-gray-600 text-sm leading-relaxed">
+            Includes full access to the product, plus all future updates.
+            Add more seats, upgrade, pause or cancel your subscription at any time.
+          </p>
+
+          <p class="text-gray-500 text-sm">
+            All prices in <span class="font-medium" id="currency-code">USD</span>
+          </p>
+        </div>
+
+        <!-- Price breakdown table -->
+        <table class="w-full">
+          <tbody class="divide-y divide-gray-100">
+            <!-- Spotlight row (visible by default, hidden when tailwindPlus is active) -->
+            <tr id="spotlight-line-row">
+              <td class="py-4 text-gray-700 font-medium">Spotlight - Personal Template</td>
+              <td class="py-4 text-right text-gray-700 font-medium" id="spotlight-price">$0.00</td>
+            </tr>
+
+            <!-- Oatmeal line item (hidden until added) -->
+            <tr id="oatmeal-line-row" class="hidden">
+              <td class="py-4 text-gray-700 font-medium">Oatmeal - Personal Template</td>
+              <td class="py-4 text-right text-gray-700 font-medium" id="oatmeal-price">$0.00</td>
+            </tr>
+
+            <!-- tailwindPlus line item (hidden until switched) -->
+            <tr id="tailwindplus-line-row" class="hidden">
+              <td class="py-4 text-gray-700 font-medium">tailwindPlus</td>
+              <td class="py-4 text-right text-gray-700 font-medium" id="tailwindplus-price">$0.00</td>
+            </tr>
+
+            <tr>
+              <td class="py-4 text-gray-500">Subtotal</td>
+              <td class="py-4 text-right font-medium text-gray-700" id="subtotal">$0.00</td>
+            </tr>
+
+            <tr id="discount-row" class="hidden">
+              <td class="py-4 text-gray-500">Discount</td>
+              <td class="py-4 text-right text-green-600" id="discount-amount">-$0.00</td>
+            </tr>
+
+            <tr>
+              <td class="py-4 text-gray-500">Taxes</td>
+              <td class="py-4 text-right text-gray-500" id="tax-amount">$0.00</td>
+            </tr>
+
+            <tr class="border-t-2 border-gray-200">
+              <td class="py-4 font-semibold text-gray-900">Total price (due today)</td>
+              <td class="py-4 text-right font-semibold text-gray-900" id="total-price-row">$0.00</td>
+            </tr>
+
+            <tr id="recurring-row" class="hidden">
+              <td class="py-4 text-gray-500">then</td>
+              <td class="py-4 text-right text-gray-500" id="recurring-amount">$0.00 every month</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Oatmeal add-on callout (shown on load) -->
+        <div id="oatmeal-callout" class="rounded-xl bg-[#E6F9FF] border border-[#B3EFFF] p-4 space-y-3">
+          <div class="flex gap-3">
+            <div class="mt-0.5 shrink-0">
+              <svg class="w-5 h-5 text-[#00BCFF]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <p class="text-sm font-semibold text-gray-900">Add Oatmeal - Personal Template to your order</p>
+              <p class="text-sm text-gray-600 leading-relaxed">
+                Elegant marketing website kit built with Tailwind CSS and Tailwind Plus Elements.
+              </p>
+            </div>
+          </div>
+          <button id="add-oatmeal-btn"
+            class="ml-8 text-sm font-medium text-[#00BCFF] bg-[#CCF4FF] hover:bg-[#99EAFF] transition-colors px-4 py-2 rounded-lg">
+            Add Oatmeal to order
+          </button>
+        </div>
+
+        <!-- tailwindPlus upsell callout (hidden on load, shown after Oatmeal is added) -->
+        <div id="tailwind-callout" class="hidden rounded-xl bg-[#E6F9FF] border border-[#B3EFFF] p-4 space-y-3">
+          <div class="flex gap-3">
+            <div class="mt-0.5 shrink-0">
+              <svg class="w-5 h-5 text-[#00BCFF]" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <p class="text-sm font-semibold text-gray-900">Get lifetime access with tailwindPlus</p>
+              <p class="text-sm text-gray-600 leading-relaxed">
+                Get lifetime access to the marketing, application UI, and ecommerce components, all of our site templates, as well as our Catalyst UI Kit for a single one-time purchase with tailwindPlus.
+              </p>
+            </div>
+          </div>
+          <button id="switch-product-btn"
+            class="ml-8 text-sm font-medium text-[#00BCFF] bg-[#CCF4FF] hover:bg-[#99EAFF] transition-colors px-4 py-2 rounded-lg">
+            Switch to tailwindPlus
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Right: Paddle Checkout Iframe -->
+      <div class="flex-1">
+        <div class="bg-white rounded-2xl shadow-xl ring-1 ring-gray-200 p-6 lg:p-8">
+          <div class="text-lg font-semibold text-gray-900 mb-8">Payment details</div>
+          <div class="checkout-container"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_PRICE_ID       = 'pri_01kqaztkq8pht595f8qknw0jxy';
+    const OATMEAL_PRICE_ID       = 'pri_01kqazvefbjthesswsqfs34wfg';
+    const TAILWIND_PLUS_PRICE_ID = 'pri_01kqag3t21r1pfra10a54q7k71';
+
+    let cartItems       = [{ priceId: DEFAULT_PRICE_ID, quantity: 1 }];
+    let storedCustomer  = null;
+    let storedAddress   = null;
+
+    function formatPrice(amount, currency = 'USD') {
+      const symbols = { GBP: '£', USD: '$', EUR: '€', CAD: 'CA$', AUD: 'A$', JPY: '¥' };
+      const sym = symbols[currency] ?? (currency + ' ');
+      return sym + Number(amount).toFixed(2);
+    }
+
+    function updateDisplay(event) {
+      if (!event.name) return;
+      const data     = event.data;
+      const currency = data.currency_code || 'USD';
+
+      if (data.customer?.id) storedCustomer = { id: data.customer.id };
+      else if (data.customer?.email) storedCustomer = { email: data.customer.email };
+
+      if (data.address?.id) storedAddress = { id: data.address.id };
+      else if (data.address?.country_code) {
+        storedAddress = {
+          countryCode: data.address.country_code,
+          ...(data.address.postal_code && { postalCode: data.address.postal_code }),
+        };
+      }
+
+      document.getElementById('currency-code').textContent   = currency;
+      document.getElementById('total-price').textContent     = formatPrice(data.totals?.total    ?? 0, currency);
+      document.getElementById('total-price-row').textContent = formatPrice(data.totals?.total    ?? 0, currency);
+      document.getElementById('subtotal').textContent        = formatPrice(data.totals?.subtotal ?? 0, currency);
+      document.getElementById('tax-amount').textContent      = formatPrice(data.totals?.tax      ?? 0, currency);
+
+      if (cartItems[0]?.priceId === TAILWIND_PLUS_PRICE_ID) {
+        document.getElementById('tailwindplus-price').textContent =
+          formatPrice(data.items?.[0]?.totals?.subtotal ?? 0, currency);
+      } else {
+        document.getElementById('spotlight-price').textContent =
+          formatPrice(data.items?.[0]?.totals?.subtotal ?? 0, currency);
+        document.getElementById('oatmeal-price').textContent =
+          formatPrice(data.items?.[1]?.totals?.subtotal ?? 0, currency);
+      }
+
+      const discount = data.totals?.discount ?? 0;
+      document.getElementById('discount-row').classList.toggle('hidden', discount <= 0);
+      document.getElementById('discount-amount').textContent = '-' + formatPrice(discount, currency);
+
+      const recurringRow = document.getElementById('recurring-row');
+      if (data.recurring_totals) {
+        const interval = data.items?.[0]?.billing_cycle?.interval === 'year' ? 'year' : 'month';
+        document.getElementById('recurring-amount').textContent =
+          formatPrice(data.recurring_totals.total, currency) + ' every ' + interval;
+        recurringRow.classList.remove('hidden');
+      } else {
+        recurringRow.classList.add('hidden');
+      }
+    }
+
+    function openCheckout() {
+      const discountCode = new URLSearchParams(window.location.search).get('code') || undefined;
+      Paddle.Checkout.open({
+        settings: {
+          displayMode: 'inline',
+          variant: 'express',
+          showAddDiscounts: false,
+          frameTarget: 'checkout-container',
+          frameInitialHeight: 450,
+          frameStyle: 'width: 100%; background-color: transparent; border: none;'        },
+        items: cartItems,
+        ...(discountCode && { discountCode }),
+      });
+    }
+
+    function buildUpdatePayload(items) {
+      const payload = { items };
+      if (storedCustomer) payload.customer = storedCustomer;
+      if (storedAddress)  payload.address  = storedAddress;
+      return payload;
+    }
+
+    function addOatmeal() {
+      cartItems = [
+        { priceId: DEFAULT_PRICE_ID, quantity: 1 },
+        { priceId: OATMEAL_PRICE_ID, quantity: 1 },
+      ];
+      Paddle.Checkout.updateCheckout(buildUpdatePayload(cartItems));
+      document.getElementById('oatmeal-callout').classList.add('hidden');
+      document.getElementById('oatmeal-line-row').classList.remove('hidden');
+      document.getElementById('tailwind-callout').classList.remove('hidden');
+    }
+
+    function switchToTailwindPlus() {
+      cartItems = [{ priceId: TAILWIND_PLUS_PRICE_ID, quantity: 1 }];
+      Paddle.Checkout.updateCheckout(buildUpdatePayload(cartItems));
+      document.getElementById('tailwind-callout').classList.add('hidden');
+      document.getElementById('spotlight-line-row').classList.add('hidden');
+      document.getElementById('oatmeal-line-row').classList.add('hidden');
+      document.getElementById('tailwindplus-line-row').classList.remove('hidden');
+    }
+
+    document.getElementById('add-oatmeal-btn').addEventListener('click', addOatmeal);
+    document.getElementById('switch-product-btn').addEventListener('click', switchToTailwindPlus);
+
+    Paddle.Environment.set('sandbox');
+    Paddle.Initialize({
+      token: 'test_0ea6e8503a59c28832f91050073',
+      eventCallback: updateDisplay,
+    });
+
+    openCheckout();
+  </script>
+</body>
+</html>
