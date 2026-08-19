@@ -204,13 +204,20 @@
       Paddle.Checkout.open({
         settings: {
           displayMode: 'inline',
-          variant: 'express',
+          variant: 'one-page',
           showAddDiscounts: false,
           frameTarget: 'checkout-container',
           frameInitialHeight: 450,
           frameStyle: 'width: 100%; background-color: transparent; border: none;'        },
         items: cartItems,
         ...(discountCode && { discountCode }),
+        customer: {
+          email: "andrei.volkov+blipblp@paddle.com",
+          address: {
+            country_code: "US",
+            postal_code: "94306"
+          },
+        }
       });
     }
 
