@@ -756,17 +756,13 @@
         Paddle.Checkout.open({
           items: [{ priceId: plan.priceId, quantity: 1 }],
           customer: {
-            email: "andrei.volkov@paddle.com",
-            address: {
-              countryCode: "US",
-              postalCode: "10001"
-            }
+            email: "andrei.volkov@paddle.com"
           },
           discountId: plan.discountId,
           settings: {
             displayMode: "inline",
             theme: "light",
-            variant: "multi-page",
+            variant: "express",
             frameTarget: "checkout-frame-target",
             frameInitialHeight: "182",
             frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
