@@ -1,263 +1,822 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Checkout</title>
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 min-h-screen">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curvy — Get Your Plan</title>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --cream: #fbf6ec;
+        --red: #fa4b3e;
+        --red-dark: #e8382b;
+        --dark: #1c1c22;
+        --text-dim: #8b8b93;
+        --border: #ece7db;
+        --tan: #efe9dc;
+        --green: #2fb256;
+      }
 
-  <div class="max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8">
-    <div class="flex flex-col lg:flex-row lg:items-start gap-8 xl:gap-16 lg:py-12">
+      * {
+        box-sizing: border-box;
+      }
 
-      <!-- Left: Price Summary -->
-      <div class="w-full lg:w-[500px] space-y-6">
-        <div class="space-y-4">
-          <h5 class="text-[#00BCFF] font-semibold text-sm uppercase tracking-wide" id="company-name">
-            tailwind
-          </h5>
+      body {
+        margin: 0;
+        font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+        color: var(--dark);
+        background: var(--cream);
+      }
 
-          <div>
-            <h3 class="text-4xl font-bold text-gray-900" id="total-price">$0.00</h3>
-            <h4 class="text-sm text-gray-500 mt-1">due today</h4>
-          </div>
+      /* ---------- Top bar ---------- */
+      .top-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: #fff;
+        padding: 14px 20px;
+      }
 
-          <p class="text-gray-600 text-sm leading-relaxed">
-            Includes full access to the product, plus all future updates.
-            Add more seats, upgrade, pause or cancel your subscription at any time.
-          </p>
+      .timer-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        background: #f2f0eb;
+        border-radius: 12px;
+        padding: 6px 16px;
+      }
 
-          <p class="text-gray-500 text-sm">
-            All prices in <span class="font-medium" id="currency-code">USD</span>
-          </p>
+      .timer-box .timer-digits {
+        display: flex;
+        gap: 2px;
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--red);
+        line-height: 1;
+      }
+
+      .timer-box .timer-labels {
+        display: flex;
+        gap: 10px;
+        font-size: 10px;
+        color: var(--text-dim);
+        font-weight: 600;
+        margin-top: 2px;
+      }
+
+      .timer-box .timer-labels span {
+        width: 24px;
+        text-align: center;
+      }
+
+      .btn-red {
+        appearance: none;
+        border: none;
+        background: var(--red);
+        color: #fff;
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+        border-radius: 12px;
+        padding: 16px 28px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+      }
+
+      .btn-red:hover {
+        background: var(--red-dark);
+      }
+
+      .discount-banner {
+        text-align: center;
+        background: #ececec;
+        color: var(--dark);
+        font-size: 14px;
+        font-weight: 600;
+        padding: 10px 16px;
+      }
+
+      /* ---------- Main content ---------- */
+      .page {
+        max-width: 640px;
+        margin: 0 auto;
+        padding: 40px 24px 140px;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 36px;
+        font-weight: 800;
+        line-height: 1.15;
+        margin: 0 0 28px;
+      }
+
+      .goal-card {
+        display: flex;
+        align-items: stretch;
+        background: var(--tan);
+        border-radius: 16px;
+        padding: 18px 24px;
+        margin-bottom: 24px;
+      }
+
+      .goal-col {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .goal-col .divider {
+        width: 1px;
+        background: #ddd6c7;
+        margin: 0 20px;
+      }
+
+      .goal-icon {
+        width: 34px;
+        height: 34px;
+        flex-shrink: 0;
+        color: var(--dark);
+      }
+
+      .goal-col .label {
+        display: block;
+        font-size: 13px;
+        color: var(--text-dim);
+        font-weight: 500;
+      }
+
+      .goal-col .value {
+        display: block;
+        font-size: 19px;
+        font-weight: 700;
+      }
+
+      /* ---------- Promo code card ---------- */
+      .promo-card {
+        background: #fff;
+        border-radius: 18px;
+        margin-bottom: 24px;
+        overflow: visible;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+
+      .promo-header {
+        position: relative;
+        background: var(--dark);
+        border-radius: 18px 18px 0 0;
+        padding: 22px 20px 16px 150px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 17px;
+        display: flex;
+        align-items: center;
+        min-height: 30px;
+      }
+
+      .promo-header::after {
+        content: "";
+        position: absolute;
+        top: -1px;
+        left: 0;
+        right: 0;
+        height: 9px;
+        background-image: radial-gradient(circle 6px at 6px 0, transparent 5.5px, var(--dark) 6px);
+        background-size: 14px 9px;
+        background-repeat: repeat-x;
+      }
+
+      .promo-ribbon {
+        position: absolute;
+        left: 16px;
+        top: -14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        z-index: 2;
+      }
+
+      .promo-ribbon .tag {
+        background: var(--red);
+        color: #fff;
+        font-weight: 800;
+        font-size: 15px;
+        line-height: 1.15;
+        text-align: center;
+        border-radius: 6px 10px 10px 6px;
+        padding: 8px 12px;
+        transform: rotate(-6deg);
+        box-shadow: 0 3px 8px rgba(250, 75, 62, 0.35);
+        position: relative;
+      }
+
+      .promo-ribbon .tag::before {
+        content: "";
+        position: absolute;
+        left: -5px;
+        top: 50%;
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border-radius: 50%;
+        transform: translateY(-50%);
+      }
+
+      .promo-ribbon .old-pct {
+        background: #fff;
+        color: #b9b4a8;
+        text-decoration: line-through;
+        font-weight: 700;
+        font-size: 13px;
+        border-radius: 8px;
+        padding: 6px 9px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+
+      .promo-body {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 20px 20px;
+      }
+
+      .promo-codes {
+        background: #f5f3ee;
+        border-radius: 12px;
+        padding: 10px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .promo-codes .old-code {
+        font-size: 12.5px;
+        color: #b7b2a5;
+        text-decoration: line-through;
+        font-weight: 500;
+      }
+
+      .promo-codes .new-code {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .promo-codes .new-code .check {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--green);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .promo-codes .new-code .check svg {
+        width: 10px;
+        height: 10px;
+        stroke: #fff;
+      }
+
+      /* ---------- Plans ---------- */
+      .plans {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .plan-card {
+        background: #fff;
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        cursor: pointer;
+        overflow: hidden;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .plan-card:hover {
+        border-color: #f3c7c2;
+      }
+
+      .plan-card.selected {
+        border-color: var(--red);
+        box-shadow: 0 0 0 1px var(--red);
+      }
+
+      .plan-badge-bar {
+        background: var(--dark);
+        color: #fff;
+        text-align: center;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        padding: 8px;
+      }
+
+      .plan-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 18px 20px;
+      }
+
+      .plan-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .radio {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        border: 2px solid #ddd8ca;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+      }
+
+      .plan-card.selected .radio {
+        background: var(--red);
+        border-color: var(--red);
+      }
+
+      .radio svg {
+        width: 13px;
+        height: 13px;
+        stroke: #fff;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+      }
+
+      .plan-card.selected .radio svg {
+        opacity: 1;
+      }
+
+      .plan-info .plan-name {
+        font-size: 17px;
+        font-weight: 700;
+        margin: 0 0 6px;
+      }
+
+      .off-badge {
+        display: inline-block;
+        background: var(--red);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        border-radius: 6px;
+        padding: 3px 8px;
+        margin-bottom: 6px;
+      }
+
+      .price-line {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: var(--text-dim);
+        font-weight: 500;
+      }
+
+      .price-line .old-price {
+        text-decoration: line-through;
+      }
+
+      .price-line .new-price {
+        color: var(--dark);
+        font-weight: 700;
+      }
+
+      .plan-right {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      .plan-right .per-day-price {
+        font-size: 24px;
+        font-weight: 800;
+      }
+
+      .plan-right .per-day-label {
+        font-size: 12px;
+        color: var(--text-dim);
+        font-weight: 500;
+      }
+
+      .plan-footer {
+        background: #f5f3ee;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--dark);
+        padding: 9px;
+      }
+
+      /* ---------- Sticky bottom CTA ---------- */
+      .sticky-cta {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: #fff;
+        padding: 14px 24px 20px;
+        box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.06);
+      }
+
+      .sticky-cta .btn-red {
+        display: block;
+        width: 100%;
+        max-width: 640px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 17px;
+        font-size: 16px;
+      }
+
+      /* ---------- Checkout modal ---------- */
+      .checkout-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(20, 18, 15, 0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .checkout-backdrop[hidden] {
+        display: none;
+      }
+
+      .checkout-backdrop.show {
+        opacity: 1;
+      }
+
+      .checkout-modal {
+        position: relative;
+        background: #fff;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 460px;
+        max-height: 88vh;
+        overflow-y: auto;
+        padding: 44px 28px 28px;
+        text-align: center;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        transform: translateY(24px) scale(0.97);
+        transition: transform 0.25s ease;
+      }
+
+      .checkout-backdrop.show .checkout-modal {
+        transform: translateY(0) scale(1);
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 18px;
+        left: 18px;
+        width: 30px;
+        height: 30px;
+        border: none;
+        background: none;
+        color: var(--dark);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+      }
+
+      .modal-close:hover {
+        background: #f2f0eb;
+      }
+
+      .modal-close svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .modal-badge-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 6px;
+      }
+
+      .starburst {
+        width: 126px;
+        height: 126px;
+        background: linear-gradient(160deg, var(--red), var(--red-dark));
+        color: #fff;
+        font-weight: 800;
+        font-size: 19px;
+        line-height: 1.15;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        clip-path: polygon(50% 0%, 61% 16%, 79% 6%, 80% 26%, 98% 31%, 90% 48%, 100% 63%, 83% 68%, 86% 87%, 68% 80%, 58% 97%, 47% 82%, 29% 94%, 24% 76%, 5% 78%, 12% 60%, 0% 46%, 16% 35%, 12% 16%, 32% 22%);
+        box-shadow: 0 10px 24px rgba(250, 75, 62, 0.35);
+      }
+
+      .modal-save-text {
+        color: var(--text-dim);
+        font-size: 15px;
+        font-weight: 500;
+        margin: 4px 0 10px;
+      }
+
+      .modal-price-row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        margin: 0 0 20px;
+      }
+
+      .modal-price-new {
+        font-size: 34px;
+        font-weight: 800;
+      }
+
+      .modal-price-old {
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text-dim);
+        text-decoration: line-through;
+      }
+
+      .checkout-frame-target {
+        text-align: left;
+        min-height: 260px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="timer-box">
+        <div>
+          <div class="timer-digits"><span id="timer-min">09</span><span>:</span><span id="timer-sec">02</span></div>
+          <div class="timer-labels"><span>Min</span><span>Sec</span></div>
         </div>
-
-        <!-- Price breakdown table -->
-        <table class="w-full">
-          <tbody class="divide-y divide-gray-100">
-            <!-- Spotlight row (visible by default, hidden when tailwindPlus is active) -->
-            <tr id="spotlight-line-row">
-              <td class="py-4 text-gray-700 font-medium">Spotlight - Personal Template</td>
-              <td class="py-4 text-right text-gray-700 font-medium" id="spotlight-price">$0.00</td>
-            </tr>
-
-            <!-- Oatmeal line item (hidden until added) -->
-            <tr id="oatmeal-line-row" class="hidden">
-              <td class="py-4 text-gray-700 font-medium">Oatmeal - Personal Template</td>
-              <td class="py-4 text-right text-gray-700 font-medium" id="oatmeal-price">$0.00</td>
-            </tr>
-
-            <!-- tailwindPlus line item (hidden until switched) -->
-            <tr id="tailwindplus-line-row" class="hidden">
-              <td class="py-4 text-gray-700 font-medium">tailwindPlus</td>
-              <td class="py-4 text-right text-gray-700 font-medium" id="tailwindplus-price">$0.00</td>
-            </tr>
-
-            <tr>
-              <td class="py-4 text-gray-500">Subtotal</td>
-              <td class="py-4 text-right font-medium text-gray-700" id="subtotal">$0.00</td>
-            </tr>
-
-            <tr id="discount-row" class="hidden">
-              <td class="py-4 text-gray-500">Discount</td>
-              <td class="py-4 text-right text-green-600" id="discount-amount">-$0.00</td>
-            </tr>
-
-            <tr>
-              <td class="py-4 text-gray-500">Taxes</td>
-              <td class="py-4 text-right text-gray-500" id="tax-amount">$0.00</td>
-            </tr>
-
-            <tr class="border-t-2 border-gray-200">
-              <td class="py-4 font-semibold text-gray-900">Total price (due today)</td>
-              <td class="py-4 text-right font-semibold text-gray-900" id="total-price-row">$0.00</td>
-            </tr>
-
-            <tr id="recurring-row" class="hidden">
-              <td class="py-4 text-gray-500">then</td>
-              <td class="py-4 text-right text-gray-500" id="recurring-amount">$0.00 every month</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <!-- Oatmeal add-on callout (shown on load) -->
-        <div id="oatmeal-callout" class="rounded-xl bg-[#E6F9FF] border border-[#B3EFFF] p-4 space-y-3">
-          <div class="flex gap-3">
-            <div class="mt-0.5 shrink-0">
-              <svg class="w-5 h-5 text-[#00BCFF]" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
-              </svg>
-            </div>
-            <div class="space-y-1">
-              <p class="text-sm font-semibold text-gray-900">Add Oatmeal - Personal Template to your order</p>
-              <p class="text-sm text-gray-600 leading-relaxed">
-                Elegant marketing website kit built with Tailwind CSS and Tailwind Plus Elements.
-              </p>
-            </div>
-          </div>
-          <button id="add-oatmeal-btn"
-            class="ml-8 text-sm font-medium text-[#00BCFF] bg-[#CCF4FF] hover:bg-[#99EAFF] transition-colors px-4 py-2 rounded-lg">
-            Add Oatmeal to order
-          </button>
-        </div>
-
-        <!-- tailwindPlus upsell callout (hidden on load, shown after Oatmeal is added) -->
-        <div id="tailwind-callout" class="hidden rounded-xl bg-[#E6F9FF] border border-[#B3EFFF] p-4 space-y-3">
-          <div class="flex gap-3">
-            <div class="mt-0.5 shrink-0">
-              <svg class="w-5 h-5 text-[#00BCFF]" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd"/>
-              </svg>
-            </div>
-            <div class="space-y-1">
-              <p class="text-sm font-semibold text-gray-900">Get lifetime access with tailwindPlus</p>
-              <p class="text-sm text-gray-600 leading-relaxed">
-                Get lifetime access to the marketing, application UI, and ecommerce components, all of our site templates, as well as our Catalyst UI Kit for a single one-time purchase with tailwindPlus.
-              </p>
-            </div>
-          </div>
-          <button id="switch-product-btn"
-            class="ml-8 text-sm font-medium text-[#00BCFF] bg-[#CCF4FF] hover:bg-[#99EAFF] transition-colors px-4 py-2 rounded-lg">
-            Switch to tailwindPlus
-          </button>
-        </div>
-
       </div>
-
-      <!-- Right: Paddle Checkout Iframe -->
-      <div class="flex-1">
-        <div class="bg-white rounded-2xl shadow-xl ring-1 ring-gray-200 p-6 lg:p-8">
-          <div class="text-lg font-semibold text-gray-900 mb-8">Payment details</div>
-          <div class="checkout-container"></div>
-        </div>
-      </div>
-
+      <button class="btn-red" id="cta-top">GET MY PLAN</button>
     </div>
-  </div>
 
-  <script>
-    const DEFAULT_PRICE_ID       = 'pri_01kqaztkq8pht595f8qknw0jxy';
-    const OATMEAL_PRICE_ID       = 'pri_01kqazvefbjthesswsqfs34wfg';
-    const TAILWIND_PLUS_PRICE_ID = 'pri_01kqag3t21r1pfra10a54q7k71';
+    <div class="discount-banner">🎁&nbsp; 83% discount reserved for you</div>
 
-    let cartItems       = [{ priceId: DEFAULT_PRICE_ID, quantity: 1 }];
-    let storedCustomer  = null;
-    let storedAddress   = null;
+    <div class="page">
+      <h1>Get your plan with a<br />bigger discount!</h1>
 
-    function formatPrice(amount, currency = 'USD') {
-      const symbols = { GBP: '£', USD: '$', EUR: '€', CAD: 'CA$', AUD: 'A$', JPY: '¥' };
-      const sym = symbols[currency] ?? (currency + ' ');
-      return sym + Number(amount).toFixed(2);
-    }
+      <div class="goal-card">
+        <div class="goal-col">
+          <svg class="goal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>
+          <span>
+            <span class="label">Goal</span>
+            <span class="value">Curvy</span>
+          </span>
+        </div>
+        <div class="divider"></div>
+        <div class="goal-col">
+          <svg class="goal-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 8h12l1.2 12.2a1 1 0 0 1-1 1.1H5.8a1 1 0 0 1-1-1.1L6 8Z"/><path d="M9 8a3 3 0 0 1 6 0"/></svg>
+          <span>
+            <span class="label">Target weight</span>
+            <span class="value">123 lbs</span>
+          </span>
+        </div>
+      </div>
 
-    function updateDisplay(event) {
-      if (!event.name) return;
-      const data     = event.data;
-      const currency = data.currency_code || 'USD';
+      <div class="promo-card">
+        <div class="promo-header">
+          <div class="promo-ribbon">
+            <div class="tag">83%<br />OFF</div>
+            <div class="old-pct">67%</div>
+          </div>
+          New Promo Code applied!
+        </div>
+        <div class="promo-body">
+          <div class="promo-codes">
+            <span class="old-code">xjms_may26</span>
+            <span class="new-code">
+              <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span>
+              xjms_jun26
+            </span>
+          </div>
+          <div class="timer-box">
+            <div>
+              <div class="timer-digits"><span class="promo-timer-min">09</span><span>:</span><span class="promo-timer-sec">02</span></div>
+              <div class="timer-labels"><span>Min</span><span>Sec</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      if (data.customer?.id) storedCustomer = { id: data.customer.id };
-      else if (data.customer?.email) storedCustomer = { email: data.customer.email };
+      <div class="plans" id="plans">
+        <div class="plan-card" data-plan="week1">
+          <div class="plan-row">
+            <div class="plan-left">
+              <div class="radio"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div class="plan-info">
+                <p class="plan-name">1-Week Trial</p>
+                <span class="off-badge">83% OFF</span>
+                <div class="price-line"><span class="old-price">$14.99</span>→<span class="new-price">$2.49</span></div>
+              </div>
+            </div>
+            <div class="plan-right">
+              <div class="per-day-price">$0.36</div>
+              <div class="per-day-label">per day</div>
+            </div>
+          </div>
+        </div>
 
-      if (data.address?.id) storedAddress = { id: data.address.id };
-      else if (data.address?.country_code) {
-        storedAddress = {
-          countryCode: data.address.country_code,
-          ...(data.address.postal_code && { postalCode: data.address.postal_code }),
-        };
-      }
+        <div class="plan-card selected" data-plan="week4">
+          <div class="plan-badge-bar">MOST POPULAR</div>
+          <div class="plan-row">
+            <div class="plan-left">
+              <div class="radio"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div class="plan-info">
+                <p class="plan-name">4-Week Plan</p>
+                <span class="off-badge">83% OFF</span>
+                <div class="price-line"><span class="old-price">$29.99</span>→<span class="new-price">$4.99</span></div>
+              </div>
+            </div>
+            <div class="plan-right">
+              <div class="per-day-price">$0.18</div>
+              <div class="per-day-label">per day</div>
+            </div>
+          </div>
+          <div class="plan-footer">🎁&nbsp; Additional boost plan for you</div>
+        </div>
 
-      document.getElementById('currency-code').textContent   = currency;
-      document.getElementById('total-price').textContent     = formatPrice(data.totals?.total    ?? 0, currency);
-      document.getElementById('total-price-row').textContent = formatPrice(data.totals?.total    ?? 0, currency);
-      document.getElementById('subtotal').textContent        = formatPrice(data.totals?.subtotal ?? 0, currency);
-      document.getElementById('tax-amount').textContent      = formatPrice(data.totals?.tax      ?? 0, currency);
+        <div class="plan-card" data-plan="week12">
+          <div class="plan-row">
+            <div class="plan-left">
+              <div class="radio"><svg viewBox="0 0 24 24" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></div>
+              <div class="plan-info">
+                <p class="plan-name">12-Week Plan</p>
+                <span class="off-badge">83% OFF</span>
+                <div class="price-line"><span class="old-price">$59.99</span>→<span class="new-price">$9.99</span></div>
+              </div>
+            </div>
+            <div class="plan-right">
+              <div class="per-day-price">$0.12</div>
+              <div class="per-day-label">per day</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-      if (cartItems[0]?.priceId === TAILWIND_PLUS_PRICE_ID) {
-        document.getElementById('tailwindplus-price').textContent =
-          formatPrice(data.items?.[0]?.totals?.subtotal ?? 0, currency);
-      } else {
-        document.getElementById('spotlight-price').textContent =
-          formatPrice(data.items?.[0]?.totals?.subtotal ?? 0, currency);
-        document.getElementById('oatmeal-price').textContent =
-          formatPrice(data.items?.[1]?.totals?.subtotal ?? 0, currency);
-      }
+    <div class="sticky-cta">
+      <button class="btn-red" id="cta-bottom">GET MY PLAN</button>
+    </div>
 
-      const discount = data.totals?.discount ?? 0;
-      document.getElementById('discount-row').classList.toggle('hidden', discount <= 0);
-      document.getElementById('discount-amount').textContent = '-' + formatPrice(discount, currency);
+    <div class="checkout-backdrop" id="checkout-backdrop" hidden>
+      <div class="checkout-modal">
+        <button class="modal-close" id="modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+        <div class="modal-badge-wrap">
+          <div class="starburst">83%<br />OFF</div>
+        </div>
+        <p class="modal-save-text">You save <span id="modal-save-amount">$25.00</span> in your first <span id="modal-period-label">4 weeks</span></p>
+        <p class="modal-price-row">
+          <span class="modal-price-new" id="modal-price-new">$4.99</span>
+          <span class="modal-price-old" id="modal-price-old">$29.99</span>
+        </p>
+        <div id="checkout-frame-target" class="checkout-frame-target"></div>
+      </div>
+    </div>
 
-      const recurringRow = document.getElementById('recurring-row');
-      if (data.recurring_totals) {
-        const interval = data.items?.[0]?.billing_cycle?.interval === 'year' ? 'year' : 'month';
-        document.getElementById('recurring-amount').textContent =
-          formatPrice(data.recurring_totals.total, currency) + ' every ' + interval;
-        recurringRow.classList.remove('hidden');
-      } else {
-        recurringRow.classList.add('hidden');
-      }
-    }
+    <script type="text/javascript">
+      // ---------- Paddle setup (sandbox) ----------
+      const PADDLE_CLIENT_TOKEN = "test_2f6b795252cc4d8c11f14e8b26f";
 
-    function openCheckout() {
-      const discountCode = new URLSearchParams(window.location.search).get('code') || undefined;
-      Paddle.Checkout.open({
-        settings: {
-          displayMode: 'inline',
-          variant: 'one-page',
-          showAddDiscounts: false,
-          frameTarget: 'checkout-container',
-          frameInitialHeight: 450,
-          frameStyle: 'width: 100%; background-color: transparent; border: none;'        },
-        items: cartItems,
-        ...(discountCode && { discountCode }),
-        customer: {
-          email: "andrei.volkov+blipblp@paddle.com",
-          address: {
-            country_code: "US",
-            postal_code: "94306"
+      const PLAN_DATA = {
+        week1: {
+          priceId: "pri_01m0djy3jyhsz544b6cn0mcjxf",
+          discountId: "dsc_01m0djzj9fjv7p3szcvr7v75gv",
+          fullPrice: 14.99,
+          discountAmount: 12.5,
+          periodLabel: "1 week",
+        },
+        week4: {
+          priceId: "pri_01m0djy3szv7pzhbcx4kwqt742",
+          discountId: "dsc_01m0djzkre1e0kv44zn4p07dj4",
+          fullPrice: 29.99,
+          discountAmount: 25.0,
+          periodLabel: "4 weeks",
+        },
+        week12: {
+          priceId: "pri_01m0djy40b292c01y89j765czz",
+          discountId: "dsc_01m0djzmypfc1hjf5e94hkaz2c",
+          fullPrice: 59.99,
+          discountAmount: 50.0,
+          periodLabel: "12 weeks",
+        },
+      };
+
+      Paddle.Environment.set("sandbox");
+      Paddle.Initialize({ token: PADDLE_CLIENT_TOKEN });
+
+      let selectedPlan = "week4";
+
+      const backdrop = document.getElementById("checkout-backdrop");
+      const frameTarget = document.getElementById("checkout-frame-target");
+
+      function openCheckout() {
+        const plan = PLAN_DATA[selectedPlan];
+        const discounted = (plan.fullPrice - plan.discountAmount).toFixed(2);
+
+        document.getElementById("modal-save-amount").textContent = "$" + plan.discountAmount.toFixed(2);
+        document.getElementById("modal-period-label").textContent = plan.periodLabel;
+        document.getElementById("modal-price-new").textContent = "$" + discounted;
+        document.getElementById("modal-price-old").textContent = "$" + plan.fullPrice.toFixed(2);
+
+        frameTarget.innerHTML = "";
+        backdrop.hidden = false;
+        requestAnimationFrame(() => backdrop.classList.add("show"));
+
+        Paddle.Checkout.open({
+          items: [{ priceId: plan.priceId, quantity: 1 }],
+          discountId: plan.discountId,
+          settings: {
+            displayMode: "inline",
+            theme: "light",
+            variant: "one-page",
+            frameTarget: "checkout-frame-target",
+            frameInitialHeight: "182",
+            frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
+            showAddDiscounts: false,
+            showAddTaxId: false,
           },
-        }
+        });
+      }
+
+      function closeCheckout() {
+        backdrop.classList.remove("show");
+        backdrop.style.pointerEvents = "none";
+        setTimeout(() => {
+          backdrop.hidden = true;
+          backdrop.style.pointerEvents = "";
+          frameTarget.innerHTML = "";
+        }, 250);
+      }
+
+      document.getElementById("cta-top").addEventListener("click", openCheckout);
+      document.getElementById("cta-bottom").addEventListener("click", openCheckout);
+      document.getElementById("modal-close").addEventListener("click", closeCheckout);
+      backdrop.addEventListener("click", (e) => {
+        if (e.target === backdrop) closeCheckout();
       });
-    }
 
-    function buildUpdatePayload(items) {
-      const payload = { items };
-      if (storedCustomer) payload.customer = storedCustomer;
-      if (storedAddress)  payload.address  = storedAddress;
-      return payload;
-    }
+      // ---------- Plan selection ----------
+      document.querySelectorAll(".plan-card").forEach((card) => {
+        card.addEventListener("click", () => {
+          document.querySelectorAll(".plan-card").forEach((c) => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedPlan = card.dataset.plan;
+        });
+      });
 
-    function addOatmeal() {
-      cartItems = [
-        { priceId: DEFAULT_PRICE_ID, quantity: 1 },
-        { priceId: OATMEAL_PRICE_ID, quantity: 1 },
-      ];
-      Paddle.Checkout.updateCheckout(buildUpdatePayload(cartItems));
-      document.getElementById('oatmeal-callout').classList.add('hidden');
-      document.getElementById('oatmeal-line-row').classList.remove('hidden');
-      document.getElementById('tailwind-callout').classList.remove('hidden');
-    }
+      // ---------- Countdown timers ----------
+      let remaining = 9 * 60 + 2; // 09:02
 
-    function switchToTailwindPlus() {
-      cartItems = [{ priceId: TAILWIND_PLUS_PRICE_ID, quantity: 1 }];
-      Paddle.Checkout.updateCheckout(buildUpdatePayload(cartItems));
-      document.getElementById('tailwind-callout').classList.add('hidden');
-      document.getElementById('spotlight-line-row').classList.add('hidden');
-      document.getElementById('oatmeal-line-row').classList.add('hidden');
-      document.getElementById('tailwindplus-line-row').classList.remove('hidden');
-    }
+      function pad(n) {
+        return String(n).padStart(2, "0");
+      }
 
-    document.getElementById('add-oatmeal-btn').addEventListener('click', addOatmeal);
-    document.getElementById('switch-product-btn').addEventListener('click', switchToTailwindPlus);
+      function renderTimer() {
+        const min = Math.floor(remaining / 60);
+        const sec = remaining % 60;
+        document.getElementById("timer-min").textContent = pad(min);
+        document.getElementById("timer-sec").textContent = pad(sec);
+        document.querySelectorAll(".promo-timer-min").forEach((el) => (el.textContent = pad(min)));
+        document.querySelectorAll(".promo-timer-sec").forEach((el) => (el.textContent = pad(sec)));
+      }
 
-    Paddle.Environment.set('sandbox');
-    Paddle.Initialize({
-      token: 'test_0ea6e8503a59c28832f91050073',
-      eventCallback: updateDisplay,
-    });
+      setInterval(() => {
+        remaining = remaining > 0 ? remaining - 1 : 9 * 60 + 2;
+        renderTimer();
+      }, 1000);
 
-    openCheckout();
-  </script>
-</body>
+      renderTimer();
+    </script>
+  </body>
 </html>
