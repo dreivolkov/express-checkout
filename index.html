@@ -1,1153 +1,529 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Templify — Last Chance</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
-  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:          #191919;
-      --bg-card:     #252525;
-      --bg-card-sel: #261c3e;
-      --accent:      #8B5CF6;
-      --yellow:      #f2ec5c;
-      --save-red:    #E84040;
-      --purple-sec:  #6B4FA0;
-      --text:        #ffffff;
-      --text-dim:    #cccccc;
-      --text-muted:  #7a7a7a;
-      --border:      #383838;
-      --border-sel:  #8B5CF6;
-      --gold:        #ffd700;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    em {
-      font-style: italic;
-      font-family: 'Playfair Display', Georgia, serif;
-      color: var(--yellow);
-      font-weight: 400;
-    }
-
-    .mobile-viewport {
-      max-width: 430px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    /* ── Sticky Header ──────────────────────────────────────────────── */
-    .sticky-header {
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: var(--yellow);
-      padding: 10px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .timer-container {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-
-    .timer-digit-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .timer-digit {
-      font-size: 28px;
-      font-weight: 900;
-      color: #1a1a1a;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-      letter-spacing: 1px;
-    }
-
-    .timer-label {
-      font-size: 8px;
-      color: #555555;
-      text-transform: lowercase;
-      letter-spacing: 0.3px;
-      margin-top: 2px;
-    }
-
-    .timer-separator {
-      font-size: 26px;
-      font-weight: 900;
-      color: #1a1a1a;
-      margin-bottom: 12px;
-      padding: 0 1px;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .country-select {
-      background: rgba(0,0,0,0.12);
-      border: 1px solid rgba(0,0,0,0.2);
-      color: #1a1a1a;
-      padding: 7px 26px 7px 10px;
-      border-radius: 10px;
-      font-size: 12px;
-      cursor: pointer;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23333333'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 9px center;
-    }
-    .country-select option { background: #fff; color: #111; }
-    .country-select:focus { border-color: rgba(0,0,0,0.4); }
-
-    .header-button {
-      background: #1a1a1a;
-      color: white;
-      border: none;
-      padding: 9px 18px;
-      border-radius: 50px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .header-button:hover { background: #333; }
-
-    /* ── Page Content ───────────────────────────────────────────────── */
-    .page-content {
-      padding: 28px 16px 60px;
-    }
-
-    /* ── Plan Title ─────────────────────────────────────────────────── */
-    .plan-title {
-      font-size: 26px;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 22px;
-      line-height: 1.2;
-      letter-spacing: -0.3px;
-    }
-
-    .plans-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    /* ── Plan Cards ─────────────────────────────────────────────────── */
-    .plan-item,
-    .plan-item-selected {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      border-radius: 16px;
-      padding: 14px 16px;
-      cursor: pointer;
-      user-select: none;
-      transition: border-color 0.18s, background 0.18s;
-      position: relative;
-    }
-
-    .plan-item {
-      background: var(--bg-card);
-      border: 1.5px solid var(--border);
-    }
-    .plan-item:hover { border-color: rgba(139,92,246,0.5); }
-
-    .plan-item-selected {
-      background: var(--bg-card-sel);
-      border: 2px solid var(--border-sel);
-    }
-
-    /* Radio button */
-    .plan-radio {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid #555;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.18s;
-    }
-
-    .plan-item-selected .plan-radio {
-      background: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .plan-item-selected .plan-radio::after {
-      content: '';
-      display: block;
-      width: 8px;
-      height: 8px;
-      background: white;
-      border-radius: 50%;
-    }
-
-    /* Plan text area */
-    .plan-details { flex: 1; min-width: 0; }
-
-    .plan-name {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: var(--text);
-    }
-
-    .plan-pricing {
-      font-size: 12px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
-    }
-
-    .plan-original-price {
-      text-decoration: line-through;
-      color: var(--text-muted);
-    }
-
-    .plan-arrow { color: var(--text-muted); }
-
-    .plan-discounted-price {
-      font-weight: 700;
-      color: var(--text-dim);
-    }
-
-    /* Trial plan "then" text */
-    .plan-then-price {
-      color: var(--text-dim);
-      font-weight: 600;
-    }
-
-    /* Right-side pricing */
-    .plan-price-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      flex-shrink: 0;
-    }
-
-    .plan-price-badges {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 2px;
-    }
-
-    .plan-price-old {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-decoration: line-through;
-    }
-
-    .plan-discount-badge {
-      background: var(--save-red);
-      color: white;
-      font-size: 10px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      white-space: nowrap;
-      letter-spacing: 0.2px;
-    }
-
-    .plan-price-main {
-      font-size: 22px;
-      font-weight: 800;
-      line-height: 1;
-      color: var(--text);
-    }
-
-    .plan-price-per-day {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    /* ── Continue Button ────────────────────────────────────────────── */
-    .continue-btn-wrap { margin-top: 16px; }
-
-    .continue-button {
-      width: 100%;
-      padding: 17px;
-      background: var(--yellow);
-      color: #1a1a1a;
-      border: none;
-      border-radius: 50px;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: opacity 0.2s;
-      letter-spacing: 0.2px;
-    }
-    .continue-button:hover { opacity: 0.9; }
-
-    /* ── Disclaimer ─────────────────────────────────────────────────── */
-    .disclaimer {
-      font-size: 11px;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.7;
-      margin-top: 16px;
-    }
-    .disclaimer a { color: var(--accent); text-decoration: none; }
-    .disclaimer a:hover { text-decoration: underline; }
-
-    /* ── Guarantee Card ─────────────────────────────────────────────── */
-    .guarantee {
-      margin: 22px 0;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .guarantee-icon { font-size: 34px; flex-shrink: 0; }
-
-    .guarantee-text h4 {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .guarantee-text p {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
-
-    /* ── Divider ────────────────────────────────────────────────────── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 26px 0;
-    }
-
-    /* ── Section Title ──────────────────────────────────────────────── */
-    .section-title {
-      font-size: 24px;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 20px;
-      line-height: 1.25;
-      letter-spacing: -0.2px;
-    }
-
-    /* ── Features (purple card wrapper) ────────────────────────────── */
-    .what-you-get {
-      background: var(--purple-sec);
-      border-radius: 24px;
-      padding: 24px 16px;
-      margin: 0 0 8px;
-    }
-
-    .what-you-get .section-title { color: #fff; }
-    .what-you-get em { color: #fff; }
-
-    .features-list {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.15);
-    }
-    .feature-item:last-child { border-bottom: none; }
-
-    .feature-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.15);
-      border: 1.5px solid rgba(255,255,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .feature-title {
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 4px;
-      color: #fff;
-    }
-
-    .feature-description {
-      font-size: 12px;
-      color: rgba(255,255,255,0.65);
-      line-height: 1.55;
-    }
-
-    .try-now-button {
-      display: block;
-      width: 100%;
-      margin-top: 22px;
-      padding: 17px;
-      background: var(--yellow);
-      color: #1a1a1a;
-      border: none;
-      border-radius: 50px;
-      font-size: 17px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    /* ── Rating Card ────────────────────────────────────────────────── */
-    .rating-card {
-      background: linear-gradient(135deg, #2a1a4a 0%, #1a2535 100%);
-      border: 1px solid #383850;
-      border-radius: 18px;
-      padding: 22px 18px;
-      margin: 26px 0;
-      text-align: center;
-    }
-
-    .rating-stars { font-size: 22px; color: #CC44CC; margin-bottom: 8px; letter-spacing: 2px; }
-
-    .rating-number {
-      font-size: 48px;
-      font-weight: 900;
-      margin-bottom: 6px;
-      line-height: 1;
-    }
-
-    .rating-count { font-size: 12px; color: var(--text-muted); }
-
-    /* ── Featured In ────────────────────────────────────────────────── */
-    .featured-in {
-      text-align: center;
-      padding: 22px 0;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 30px;
-    }
-
-    .featured-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 2.5px;
-      margin-bottom: 16px;
-    }
-
-    .featured-logos {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 32px;
-    }
-
-    .featured-logo {
-      font-size: 17px;
-      font-weight: 900;
-      color: var(--text-dim);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    /* ── How To Launch ──────────────────────────────────────────────── */
-    .how-to-launch { margin-bottom: 30px; }
-
-    .step {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 22px;
-    }
-
-    .step-number {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: white;
-      font-size: 15px;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .step-title {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-
-    .step-description {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.65;
-    }
-
-    /* ── Reviews ────────────────────────────────────────────────────── */
-    .reviews { margin-bottom: 30px; }
-
-    .reviews-subtitle {
-      text-align: center;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 18px;
-    }
-
-    .review-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 10px;
-    }
-
-    .review-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .review-avatar {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 15px;
-      font-weight: 700;
-      flex-shrink: 0;
-    }
-
-    .review-name {
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 2px;
-    }
-
-    .review-stars { font-size: 12px; color: var(--gold); }
-
-    .review-text {
-      font-size: 13px;
-      color: var(--text-dim);
-      line-height: 1.6;
-    }
-
-    /* ── Checkout Section ───────────────────────────────────────────── */
-    .checkout-section { margin-top: 8px; }
-
-    .checkout-title {
-      font-size: 24px;
-      font-weight: 800;
-      text-align: center;
-      margin-bottom: 5px;
-      letter-spacing: -0.2px;
-    }
-
-    .checkout-subtitle {
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .checkout-wrapper {
-      position: relative;
-      min-height: 460px;
-    }
-
-    .checkout-loading {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 14px;
-      color: var(--text-muted);
-      font-size: 13px;
-      z-index: 10;
-      background: var(--bg-card);
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      transition: opacity 0.3s;
-    }
-    .checkout-loading.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .spinner {
-      width: 36px;
-      height: 36px;
-      border: 3px solid var(--border);
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: spin 0.75s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .paddle-checkout-frame { width: 100%; }
-
-    .security-note {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    /* ── Price fading during update ─────────────────────────────────── */
-    .price-fading { opacity: 0.3; transition: opacity 0.15s; }
-  </style>
-</head>
-<body>
-<div class="mobile-viewport">
-
-  <!-- ── Sticky Header ──────────────────────────────────────────────────── -->
-  <div class="sticky-header">
-    <div class="timer-container">
-      <div class="timer-digit-group">
-        <span class="timer-digit" id="timer-min">10</span>
-        <span class="timer-label">Minutes</span>
-      </div>
-      <span class="timer-separator">:</span>
-      <div class="timer-digit-group">
-        <span class="timer-digit" id="timer-sec">00</span>
-        <span class="timer-label">Seconds</span>
-      </div>
-    </div>
-    <div class="header-right">
-      <select class="country-select" id="countrySelect" onchange="handleCountryChange(this.value)">
-        <option value="US">🇺🇸 United States</option>
-        <option value="AU">🇦🇺 Australia</option>
-        <option value="GB">🇬🇧 United Kingdom</option>
-        <option value="CA">🇨🇦 Canada</option>
-        <option value="DE">🇩🇪 Germany</option>
-      </select>
-      <button class="header-button" onclick="scrollToCheckout()">Get my plan</button>
-    </div>
-  </div>
-
-  <!-- ── Page Content ───────────────────────────────────────────────────── -->
-  <div class="page-content">
-
-    <!-- ── Plan Selector ────────────────────────────────────────────────── -->
-    <h2 class="plan-title">Choose Your <em>Plan</em></h2>
-
-    <div class="plans-list" id="plansList">
-
-      <!-- 1-Week Trial (selected by default) -->
-      <div class="plan-item-selected" id="plan-trial" onclick="selectPlan('trial')">
-        <div class="plan-radio"></div>
-        <div class="plan-details">
-          <div class="plan-name">1-Week Trial</div>
-          <div class="plan-pricing">
-            <span id="price-trial">…</span>
-            <span>and then</span>
-            <span class="plan-then-price"><span id="price-four_week-inline">…</span> / 4-week plan</span>
-          </div>
-        </div>
-        <div class="plan-price-right">
-          <div class="plan-price-main" id="perday-trial">…</div>
-          <div class="plan-price-per-day">per day</div>
-        </div>
-      </div>
-
-      <!-- 4-Week Plan -->
-      <div class="plan-item" id="plan-four_week" onclick="selectPlan('four_week')">
-        <div class="plan-radio"></div>
-        <div class="plan-details">
-          <div class="plan-name">4-Week Plan</div>
-          <div class="plan-pricing">
-            <span class="plan-original-price" id="original-four_week">…</span>
-            <span class="plan-arrow">→</span>
-            <span class="plan-discounted-price" id="price-four_week">…</span>
-          </div>
-        </div>
-        <div class="plan-price-right">
-          <div class="plan-price-badges">
-            <span class="plan-price-old" id="old-perday-four_week">…</span>
-            <span class="plan-discount-badge">SAVE 34%</span>
-          </div>
-          <div class="plan-price-main" id="perday-four_week">…</div>
-          <div class="plan-price-per-day">per day</div>
-        </div>
-      </div>
-
-      <!-- 12-Week Plan -->
-      <div class="plan-item" id="plan-twelve_week" onclick="selectPlan('twelve_week')">
-        <div class="plan-radio"></div>
-        <div class="plan-details">
-          <div class="plan-name">12-Week Plan</div>
-          <div class="plan-pricing">
-            <span class="plan-original-price" id="original-twelve_week">…</span>
-            <span class="plan-arrow">→</span>
-            <span class="plan-discounted-price" id="price-twelve_week">…</span>
-          </div>
-        </div>
-        <div class="plan-price-right">
-          <div class="plan-price-badges">
-            <span class="plan-price-old" id="old-perday-twelve_week">…</span>
-            <span class="plan-discount-badge">SAVE 55%</span>
-          </div>
-          <div class="plan-price-main" id="perday-twelve_week">…</div>
-          <div class="plan-price-per-day">per day</div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Continue CTA -->
-    <div class="continue-btn-wrap">
-      <button class="continue-button" onclick="scrollToCheckout()">Continue</button>
-    </div>
-
-    <!-- Legal -->
-    <p class="disclaimer">
-      Without cancellation at least 24 hours before the 7-day trial ends, I accept that Templify will
-      automatically charge the recurring amount (excl. taxes) every billing period until I cancel.
-      Taxes calculated at checkout. A cancellation request must be sent to our support team.
-      Learn more about cancellation and refund policy in the
-      <a href="#">Subscription Term</a>.
-    </p>
-
-    <!-- Money-back guarantee -->
-    <div class="guarantee">
-      <div class="guarantee-icon">🛡️</div>
-      <div class="guarantee-text">
-        <h4>Money-back guarantee</h4>
-        <p>Not happy? Contact us within 30 days of your first charge and we'll refund you — no questions asked.</p>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- ── What You Will Get ─────────────────────────────────────────────── -->
-    <div class="what-you-get">
-      <h2 class="section-title">What you <em>will get</em></h2>
-      <div class="features-list">
-        <div class="feature-item">
-          <div class="feature-icon">🏆</div>
-          <div>
-            <div class="feature-title">Use 1000+ templates</div>
-            <div class="feature-description">Access weekly updated designs for Reels and Stories.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">💡</div>
-          <div>
-            <div class="feature-title">Categories to fit every need</div>
-            <div class="feature-description">From travel, fashion and food to business and many more.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">⏱️</div>
-          <div>
-            <div class="feature-title">Create in minutes</div>
-            <div class="feature-description">Save time with trending, ready-to-use tools.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🚀</div>
-          <div>
-            <div class="feature-title">Edit like a pro with 100+ filters</div>
-            <div class="feature-description">Use advanced video editor with authentic fonts.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">✨</div>
-          <div>
-            <div class="feature-title">Transform with effects</div>
-            <div class="feature-description">Add filters, captions, stickers, and royalty-free music.</div>
-          </div>
-        </div>
-        <div class="feature-item">
-          <div class="feature-icon">🎵</div>
-          <div>
-            <div class="feature-title">Sync to beats</div>
-            <div class="feature-description">Automatically match music with Beat Sync.</div>
-          </div>
-        </div>
-      </div>
-      <button class="try-now-button" onclick="scrollToCheckout()">Try Now</button>
-    </div>
-
-    <!-- ── Rating Card ────────────────────────────────────────────────────── -->
-    <div class="rating-card">
-      <div class="rating-stars">★★★★★</div>
-      <div class="rating-number">4.8</div>
-      <div class="rating-count">Based on 14,200+ ratings</div>
-    </div>
-
-    <!-- ── Featured In ────────────────────────────────────────────────────── -->
-    <div class="featured-in">
-      <div class="featured-label">As featured in</div>
-      <div class="featured-logos">
-        <div class="featured-logo">Vogue</div>
-        <div class="featured-logo">AIN</div>
-        <div class="featured-logo">ELLE</div>
-      </div>
-    </div>
-
-    <!-- ── How To Launch ──────────────────────────────────────────────────── -->
-    <div class="how-to-launch">
-      <h2 class="section-title">How to launch <em>5x more reels</em> in 5 minutes</h2>
-
-      <div class="step">
-        <div class="step-number">1</div>
-        <div>
-          <div class="step-title">Choose your template</div>
-          <div class="step-description">Discover 1000+ business templates tailored for you. Build your brand kit with custom colors, fonts, and logos. Professional styles for Instagram and Facebook, plus a content calendar to stay organized.</div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">2</div>
-        <div>
-          <div class="step-title">Select your footage</div>
-          <div class="step-description">Add your videos, images, &amp; text. Customize with music, filters, &amp; more.</div>
-        </div>
-      </div>
-
-      <div class="step">
-        <div class="step-number">3</div>
-        <div>
-          <div class="step-title">Post in minutes</div>
-          <div class="step-description">Download your reel and launch it live.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Reviews ────────────────────────────────────────────────────────── -->
-    <div class="reviews">
-      <h2 class="section-title">What Our <em>Users Say</em></h2>
-      <p class="reviews-subtitle">Join our creative business community</p>
-
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-avatar">S</div>
-          <div>
-            <div class="review-name">@sarahcreates</div>
-            <div class="review-stars">★★★★★</div>
-          </div>
-        </div>
-        <div class="review-text">"Templify changed how I create content. I launch 5× more Reels in a fraction of the time. The templates are stunning and always on-trend."</div>
-      </div>
-
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-avatar">M</div>
-          <div>
-            <div class="review-name">@marcophoto</div>
-            <div class="review-stars">★★★★★</div>
-          </div>
-        </div>
-        <div class="review-text">"The beat sync feature alone is worth it. My engagement went through the roof after switching to Templify."</div>
-      </div>
-
-      <div class="review-card">
-        <div class="review-header">
-          <div class="review-avatar">J</div>
-          <div>
-            <div class="review-name">@fashionbyjane</div>
-            <div class="review-stars">★★★★★</div>
-          </div>
-        </div>
-        <div class="review-text">"I was skeptical at first, but the 1-week trial convinced me immediately. Now I can't imagine creating content without it."</div>
-      </div>
-    </div>
-
-    <!-- ── Checkout ──────────────────────────────────────────────────────── -->
-    <div class="checkout-section" id="checkoutSection">
-      <h2 class="checkout-title">Select <em>payment method</em></h2>
-      <p class="checkout-subtitle">Secure checkout · Powered by Paddle</p>
-
-      <div class="checkout-wrapper">
-        <div class="checkout-loading" id="checkoutLoading">
-          <div class="spinner"></div>
-          <span>Loading payment form…</span>
-        </div>
-        <!-- Paddle injects the iframe inside this class-named element -->
-        <div class="paddle-checkout-frame"></div>
-      </div>
-
-      <p class="security-note">🔒 256-bit SSL · PCI DSS compliant · Cancel anytime</p>
-    </div>
-
-    <!-- Guarantee (bottom) -->
-    <div class="guarantee" style="margin-top: 24px;">
-      <div class="guarantee-icon">🔒</div>
-      <div class="guarantee-text">
-        <h4>Secure &amp; encrypted payment</h4>
-        <p>Your payment details are protected with bank-level encryption. We never store your card information.</p>
-      </div>
-    </div>
-
-  </div><!-- /page-content -->
-</div><!-- /mobile-viewport -->
-
-<!-- ── Script ─────────────────────────────────────────────────────────────── -->
-<script>
-  // ── Config ─────────────────────────────────────────────────────────────────
-  const PRICE_IDS = {
-    trial:       'pri_01m0x117w8d24pzhbs80v4h89t',
-    four_week:   'pri_01m0x11azqq44n0yg0a7hhywf1',
-    twelve_week: 'pri_01m0x11dn4gt9pj081ac6ncmdb'
-  };
-
-  const PLAN_DAYS = { trial: 7, four_week: 28, twelve_week: 84 };
-
-  // 4-week: 34% off → sale = 66% of original
-  // 12-week: 20% off → sale = 80% of original
-  const ORIGINAL_DIVISOR = { four_week: 0.66, twelve_week: 0.80 };
-
-  const COUNTRY_LOCALE = {
-    US: { locale: 'en-US', currency: 'USD' },
-    AU: { locale: 'en-AU', currency: 'AUD' },
-    GB: { locale: 'en-GB', currency: 'GBP' },
-    CA: { locale: 'en-CA', currency: 'CAD' },
-    DE: { locale: 'de-DE', currency: 'EUR' }
-  };
-
-  const COUNTRY_POSTAL = {
-    US: '10001',
-    AU: '2000',
-    GB: 'EC1A 1BB',
-    CA: 'M5V 3A8',
-    DE: '10115'
-  };
-
-  const PREFILL_EMAIL = 'andrei.volkov@paddle.com';
-
-  // ── State ───────────────────────────────────────────────────────────────────
-  let selectedPlan    = 'trial';
-  let selectedCountry = 'US';
-  let checkoutReady   = false;
-
-  // ── Paddle init ─────────────────────────────────────────────────────────────
-  Paddle.Environment.set('sandbox');
-  Paddle.Initialize({
-    token: 'test_2f6b795252cc4d8c11f14e8b26f',
-    eventCallback(event) {
-      if (event.name === 'checkout.loaded') {
-        hideCheckoutLoading();
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Bend — Premium</title>
+    <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
       }
-    }
-  });
 
-  function hideCheckoutLoading() {
-    document.getElementById('checkoutLoading').classList.add('hidden');
-    checkoutReady = true;
-  }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
+        background: linear-gradient(170deg, #6dae92 0%, #4d8c70 55%, #3d7a5e 100%);
+        min-height: 100vh;
+        min-height: 100dvh;
+        color: #fff;
+        overflow-x: hidden;
+      }
 
-  // ── Open inline checkout ─────────────────────────────────────────────────
-  // frameTarget must be a CLASS name in Paddle.js v2 (not an ID).
-  // customer.email is required whenever a customer object is passed.
-  function openInlineCheckout(priceId, countryCode = 'US') {
-    checkoutReady = false;
-    document.getElementById('checkoutLoading').classList.remove('hidden');
+      /* ---- Close button ---- */
+      .close-btn {
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 20;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.22);
+        border: none;
+        color: rgba(255, 255, 255, 0.85);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    Paddle.Checkout.open({
-      settings: {
-        displayMode:        'inline',
-        frameTarget:        'paddle-checkout-frame',
-        frameInitialHeight: 450,
-        theme: "dark",
-        frameStyle:         'width:100%;background:transparent;border:none;min-height:450px;'
-      },
-      items: [{ priceId, quantity: 1 }],
-      customer: {
-        email: PREFILL_EMAIL,
-        address: {
-          countryCode,
-          postalCode: COUNTRY_POSTAL[countryCode]
+      .close-btn svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        fill: none;
+      }
+
+      /* ---- Page layout ---- */
+      .paywall {
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 64px 22px 52px;
+        display: flex;
+        flex-direction: column;
+        gap: 26px;
+      }
+
+      /* ---- Hero ---- */
+      .hero {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .hero h1 {
+        font-size: 33px;
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.5px;
+      }
+
+      .hero .subtitle {
+        font-size: 15.5px;
+        font-weight: 400;
+        opacity: 0.88;
+        line-height: 1.55;
+      }
+
+      /* ---- Yoga images card ---- */
+      .images-card {
+        background: rgba(255, 255, 255, 0.14);
+        border-radius: 22px;
+        padding: 22px 24px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+      }
+
+      .yoga-circle {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .yoga-circle svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* ---- Benefits ---- */
+      .benefits-section {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+
+      .benefits-section h2 {
+        font-size: 29px;
+        font-weight: 800;
+        text-align: center;
+        line-height: 1.2;
+        letter-spacing: -0.3px;
+      }
+
+      .benefits-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .benefits-list li {
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .check-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.28);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+
+      .check-icon svg {
+        width: 13px;
+        height: 13px;
+        stroke: #fff;
+        stroke-width: 2.8;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* ---- Plans ---- */
+      .plans {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding-top: 6px;
+      }
+
+      .plan-wrapper {
+        position: relative;
+      }
+
+      .most-popular-badge {
+        position: absolute;
+        top: -14px;
+        right: 18px;
+        background: #fff;
+        color: #1c1c1e;
+        font-size: 12.5px;
+        font-weight: 700;
+        padding: 4px 16px;
+        border-radius: 20px;
+        letter-spacing: 0.01em;
+        z-index: 1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .plan-card {
+        background: rgba(0, 0, 0, 0.22);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 16px;
+        padding: 17px 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+
+      .plan-card:active {
+        opacity: 0.85;
+      }
+
+      .plan-card.selected {
+        border-color: #4ade80;
+        box-shadow: 0 0 0 1px #4ade80;
+      }
+
+      .plan-left {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .plan-name {
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .plan-pricing {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.72);
+      }
+
+      .plan-pricing .original {
+        text-decoration: line-through;
+        margin-right: 5px;
+      }
+
+      .plan-pricing .discounted {
+        color: #fff;
+        font-weight: 600;
+      }
+
+      .plan-right {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 16px;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      .plan-right .chevron {
+        font-size: 20px;
+        opacity: 0.55;
+        line-height: 1;
+      }
+
+      /* ---- Restore link ---- */
+      .restore-btn {
+        display: block;
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        font-size: 14px;
+        font-family: inherit;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        width: 100%;
+      }
+
+      /* ---- Checkout bottom sheet ---- */
+      .checkout-sheet {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.22s ease;
+      }
+
+      .checkout-sheet.open {
+        pointer-events: auto;
+        opacity: 1;
+      }
+
+      .sheet-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+      }
+
+      .sheet-panel {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #f2f2f7;
+        border-radius: 22px 22px 0 0;
+        padding: 10px 0 env(safe-area-inset-bottom, 0px);
+        max-height: 92vh;
+        overflow-y: auto;
+        transform: translateY(100%);
+        transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1);
+      }
+
+      .checkout-sheet.open .sheet-panel {
+        transform: translateY(0);
+      }
+
+      .sheet-handle {
+        width: 36px;
+        height: 4px;
+        background: #c7c7cc;
+        border-radius: 2px;
+        margin: 0 auto 12px;
+      }
+
+      #checkout-container {
+        padding: 0 4px 8px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Close button -->
+    <button class="close-btn" onclick="window.history.back()">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+
+    <!-- Paywall content -->
+    <div class="paywall">
+
+      <!-- Hero -->
+      <div class="hero">
+        <h1>Unlock Your Body's<br>Full Potential.</h1>
+        <p class="subtitle">Only $3.32 per month billed yearly.<br>That's 50x cheaper than a trainer.</p>
+      </div>
+
+      <!-- Yoga illustration circles -->
+      <div class="images-card">
+
+        <!-- Circle 1: dark teal, kneeling lunge -->
+        <div class="yoga-circle">
+          <svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="44" cy="44" r="44" fill="#1B5E44"/>
+            <circle cx="54" cy="20" r="7" fill="#D95F50"/>
+            <line x1="54" y1="27" x2="46" y2="48" stroke="#D95F50" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="51" y1="34" x2="62" y2="26" stroke="#D95F50" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="51" y1="34" x2="36" y2="30" stroke="#D95F50" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="46" y1="48" x2="60" y2="62" stroke="#D95F50" stroke-width="4" stroke-linecap="round"/>
+            <line x1="60" y1="62" x2="66" y2="72" stroke="#D95F50" stroke-width="4" stroke-linecap="round"/>
+            <line x1="46" y1="48" x2="30" y2="56" stroke="#D95F50" stroke-width="4" stroke-linecap="round"/>
+            <line x1="30" y1="56" x2="26" y2="68" stroke="#D95F50" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Circle 2: peach, cobra pose -->
+        <div class="yoga-circle">
+          <svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="44" cy="44" r="44" fill="#F0A07A"/>
+            <path d="M 16 68 Q 32 64 48 56 Q 60 50 64 42" stroke="#C47840" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <path d="M 64 42 Q 70 34 66 26" stroke="#C47840" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="64" cy="22" r="7" fill="#C47840"/>
+            <line x1="52" y1="58" x2="44" y2="48" stroke="#C47840" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="44" y1="48" x2="36" y2="58" stroke="#C47840" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="16" y1="68" x2="10" y2="72" stroke="#C47840" stroke-width="4" stroke-linecap="round"/>
+            <line x1="20" y1="67" x2="14" y2="74" stroke="#C47840" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <!-- Circle 3: dark navy, child's pose -->
+        <div class="yoga-circle">
+          <svg viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="44" cy="44" r="44" fill="#243368"/>
+            <ellipse cx="58" cy="60" rx="10" ry="7" fill="#A0B8D8"/>
+            <path d="M 58 54 Q 48 44 34 46 Q 22 48 16 52" stroke="#A0B8D8" stroke-width="5" stroke-linecap="round" fill="none"/>
+            <circle cx="15" cy="48" r="7" fill="#A0B8D8"/>
+            <line x1="22" y1="45" x2="12" y2="38" stroke="#A0B8D8" stroke-width="4" stroke-linecap="round"/>
+            <line x1="22" y1="50" x2="10" y2="46" stroke="#A0B8D8" stroke-width="4" stroke-linecap="round"/>
+            <line x1="58" y1="65" x2="58" y2="76" stroke="#A0B8D8" stroke-width="4.5" stroke-linecap="round"/>
+            <line x1="65" y1="64" x2="66" y2="75" stroke="#A0B8D8" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+      </div>
+
+      <!-- Benefits -->
+      <div class="benefits-section">
+        <h2>Feel Great with Just 5<br>Minutes a Day.</h2>
+        <ul class="benefits-list">
+          <li>
+            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            Improve Flexibility
+          </li>
+          <li>
+            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            Reduce Pain &amp; Tension
+          </li>
+          <li>
+            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            Better Posture
+          </li>
+          <li>
+            <span class="check-icon"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></span>
+            Guided Daily Routines
+          </li>
+        </ul>
+      </div>
+
+      <!-- Pricing plans -->
+      <div class="plans">
+
+        <!-- Yearly (default selected) -->
+        <div class="plan-wrapper">
+          <div class="most-popular-badge">Most Popular</div>
+          <div class="plan-card selected" id="plan-yearly" onclick="selectPlan('yearly')">
+            <div class="plan-left">
+              <span class="plan-name">Yearly</span>
+              <span class="plan-pricing">
+                <span class="original">$79.99</span>
+                <span class="discounted">$39.99</span>
+              </span>
+            </div>
+            <div class="plan-right">
+              $3.32 / mo
+              <span class="chevron">›</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monthly -->
+        <div class="plan-wrapper">
+          <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
+            <div class="plan-left">
+              <span class="plan-name">Monthly</span>
+            </div>
+            <div class="plan-right">
+              $13.99 / mo
+              <span class="chevron">›</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <a href="#" class="restore-btn">Continue in App</a>
+
+      <button class="restore-btn">Restore Purchases</button>
+
+    </div>
+
+    <!-- Checkout bottom sheet -->
+    <div class="checkout-sheet" id="checkout-sheet">
+      <div class="sheet-backdrop" id="sheet-backdrop"></div>
+      <div class="sheet-panel">
+        <div class="sheet-handle"></div>
+        <div id="checkout-container" class="checkout-container"></div>
+      </div>
+    </div>
+
+    <script>
+      const PADDLE_TOKEN = "test_2f6b795252cc4d8c11f14e8b26f";
+
+      const PLANS = {
+        yearly:  { priceId: "pri_01m0tpez9mfpj3msvcjwewaxkq" },
+        monthly: { priceId: "pri_01m0tpezg81frb1byreskngvyn" },
+      };
+
+      Paddle.Environment.set("sandbox");
+      Paddle.Initialize({
+        token: PADDLE_TOKEN,
+        eventCallback: (event) => {
+          if (event.name === "checkout.completed") {
+            closeSheet();
+          }
+        },
+      });
+
+      // Parse query params passed from the native app (per webview guide)
+      const params = new URLSearchParams(window.location.search);
+      const customerEmail = params.get("email")       || undefined;
+      const countryCode   = params.get("countryCode") || undefined;
+      const postalCode    = params.get("zip")         || undefined;
+
+      let activePlan = "yearly";
+
+      // Pre-load checkout immediately so it's ready when the user taps a plan
+      const preloadOptions = {
+        items: [{ priceId: PLANS.yearly.priceId, quantity: 1 }],
+        settings: {
+          displayMode: "inline",
+          theme: "light",
+          variant: "express",
+          showNonExpressPaymentMethods: false,
+          frameTarget: "checkout-container",
+          frameInitialHeight: "120",
+          frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
+          showAddDiscounts: false,
+          showAddTaxId: false,
+          allowLogout: false,
+        },
+      };
+
+      if (customerEmail || countryCode || postalCode) {
+        preloadOptions.customer = {};
+        if (customerEmail) preloadOptions.customer.email = customerEmail;
+        if (countryCode || postalCode) {
+          preloadOptions.customer.address = {};
+          if (countryCode) preloadOptions.customer.address.countryCode = countryCode;
+          if (postalCode)  preloadOptions.customer.address.postalCode  = postalCode;
         }
       }
-    });
 
-    // Fallback: hide loader after 8 s if checkout.loaded never fires
-    setTimeout(hideCheckoutLoading, 8000);
-  }
+      Paddle.Checkout.open(preloadOptions);
 
-  // ── Plan selection ──────────────────────────────────────────────────────────
-  function selectPlan(planKey) {
-    ['trial', 'four_week', 'twelve_week'].forEach(key => {
-      document.getElementById('plan-' + key).className =
-        key === planKey ? 'plan-item-selected' : 'plan-item';
-    });
-
-    selectedPlan = planKey;
-
-    if (checkoutReady) {
-      Paddle.Checkout.updateItems([{ priceId: PRICE_IDS[planKey], quantity: 1 }]);
-    } else {
-      openInlineCheckout(PRICE_IDS[planKey], selectedCountry);
-    }
-  }
-
-  // ── Country change ──────────────────────────────────────────────────────────
-  async function handleCountryChange(countryCode) {
-    selectedCountry = countryCode;
-    await fetchAndDisplayPrices(countryCode);
-    openInlineCheckout(PRICE_IDS[selectedPlan], countryCode);
-  }
-
-  // ── Format currency from minor units ───────────────────────────────────────
-  function fmtCurrency(minorUnits, currency, locale) {
-    return new Intl.NumberFormat(locale, {
-      style: 'currency',
-      currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(minorUnits / 100);
-  }
-
-  function roundToNinetyNine(decimalAmount) {
-    return Math.ceil(decimalAmount) - 0.01;
-  }
-
-  // ── Price Preview ───────────────────────────────────────────────────────────
-  function setPriceFading(fading) {
-    const ids = [
-      'price-trial', 'perday-trial', 'price-four_week-inline',
-      'price-four_week', 'perday-four_week', 'original-four_week', 'old-perday-four_week',
-      'price-twelve_week', 'perday-twelve_week', 'original-twelve_week', 'old-perday-twelve_week'
-    ];
-    ids.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.toggle('price-fading', fading);
-    });
-  }
-
-  async function fetchAndDisplayPrices(countryCode) {
-    setPriceFading(true);
-
-    try {
-      const [trialRes, fourWeekRes, twelveWeekRes] = await Promise.all([
-        Paddle.PricePreview({ items: [{ priceId: PRICE_IDS.trial,       quantity: 1 }], address: { countryCode } }),
-        Paddle.PricePreview({ items: [{ priceId: PRICE_IDS.four_week,   quantity: 1 }], address: { countryCode } }),
-        Paddle.PricePreview({ items: [{ priceId: PRICE_IDS.twelve_week, quantity: 1 }], address: { countryCode } })
-      ]);
-
-      const currency = trialRes.data.currencyCode;
-      const { locale } = COUNTRY_LOCALE[countryCode];
-
-      // ── Trial ────────────────────────────────────────────────────────────
-      const trialItem   = trialRes.data.details.lineItems[0];
-      const trialMinor  = parseInt(trialItem.unitTotals.subtotal, 10);
-      const trialPerDay = trialMinor / PLAN_DAYS.trial;
-
-      document.getElementById('price-trial').textContent  = trialItem.formattedUnitTotals.subtotal;
-      document.getElementById('perday-trial').textContent = fmtCurrency(trialPerDay, currency, locale);
-
-      // ── 4-Week ───────────────────────────────────────────────────────────
-      const fourItem     = fourWeekRes.data.details.lineItems[0];
-      const fourMinor    = parseInt(fourItem.unitTotals.subtotal, 10);
-      const fourPerDay   = fourMinor / PLAN_DAYS.four_week;
-
-      const fourOrigDecimal = roundToNinetyNine(fourMinor / ORIGINAL_DIVISOR.four_week / 100);
-      const fourOrigMinor   = Math.round(fourOrigDecimal * 100);
-      const fourOldPerDay   = fourOrigMinor / PLAN_DAYS.four_week;
-
-      document.getElementById('price-four_week-inline').textContent = fourItem.formattedUnitTotals.subtotal;
-      document.getElementById('price-four_week').textContent        = fourItem.formattedUnitTotals.subtotal;
-      document.getElementById('original-four_week').textContent     = fmtCurrency(fourOrigMinor, currency, locale);
-      document.getElementById('perday-four_week').textContent       = fmtCurrency(fourPerDay, currency, locale);
-      document.getElementById('old-perday-four_week').textContent   = fmtCurrency(fourOldPerDay, currency, locale);
-
-      // ── 12-Week ──────────────────────────────────────────────────────────
-      const twelveItem    = twelveWeekRes.data.details.lineItems[0];
-      const twelveMinor   = parseInt(twelveItem.unitTotals.subtotal, 10);
-      const twelvePerDay  = twelveMinor / PLAN_DAYS.twelve_week;
-
-      const twelveOrigDecimal = roundToNinetyNine(twelveMinor / ORIGINAL_DIVISOR.twelve_week / 100);
-      const twelveOrigMinor   = Math.round(twelveOrigDecimal * 100);
-      const twelveOldPerDay   = twelveOrigMinor / PLAN_DAYS.twelve_week;
-
-      document.getElementById('price-twelve_week').textContent      = twelveItem.formattedUnitTotals.subtotal;
-      document.getElementById('original-twelve_week').textContent   = fmtCurrency(twelveOrigMinor, currency, locale);
-      document.getElementById('perday-twelve_week').textContent     = fmtCurrency(twelvePerDay, currency, locale);
-      document.getElementById('old-perday-twelve_week').textContent = fmtCurrency(twelveOldPerDay, currency, locale);
-
-    } catch (err) {
-      console.error('[PricePreview]', err);
-    } finally {
-      setPriceFading(false);
-    }
-  }
-
-  // ── Countdown Timer ─────────────────────────────────────────────────────────
-  function startTimer() {
-    let total = 10 * 60;
-    const minEl = document.getElementById('timer-min');
-    const secEl = document.getElementById('timer-sec');
-
-    (function tick() {
-      const m = String(Math.floor(total / 60)).padStart(2, '0');
-      const s = String(total % 60).padStart(2, '0');
-      minEl.textContent = m;
-      secEl.textContent = s;
-      if (total > 0) { total--; setTimeout(tick, 1000); }
-      else {
-        minEl.style.color = '#ff4444';
-        secEl.style.color = '#ff4444';
+      function selectPlan(plan) {
+        activePlan = plan;
+        document.getElementById("plan-yearly").classList.toggle("selected", plan === "yearly");
+        document.getElementById("plan-monthly").classList.toggle("selected", plan === "monthly");
+        Paddle.Checkout.updateItems([{ priceId: PLANS[plan].priceId, quantity: 1 }]);
+        document.getElementById("checkout-sheet").classList.add("open");
       }
-    })();
-  }
 
-  // ── Scroll to checkout ──────────────────────────────────────────────────────
-  function scrollToCheckout() {
-    document.getElementById('checkoutSection').scrollIntoView({ behavior: 'smooth' });
-  }
+      function closeSheet() {
+        document.getElementById("checkout-sheet").classList.remove("open");
+      }
 
-  // ── Init ────────────────────────────────────────────────────────────────────
-  document.addEventListener('DOMContentLoaded', () => {
-    startTimer();
-    fetchAndDisplayPrices('US');
-    openInlineCheckout(PRICE_IDS[selectedPlan], 'US');
-  });
-</script>
-</body>
+      document.getElementById("sheet-backdrop").addEventListener("click", closeSheet);
+    </script>
+
+  </body>
 </html>
