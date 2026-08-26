@@ -277,7 +277,8 @@
       }
 
       .inline-checkout-inner {
-        background: #f2f2f7;
+        background: rgba(0, 0, 0, 0.22);
+        border: 2px solid rgba(255, 255, 255, 0.2);
         border-radius: 16px;
         padding: 14px 12px;
       }
@@ -454,7 +455,7 @@
         items: [{ priceId: PLANS.yearly.priceId, quantity: 1 }],
         settings: {
           displayMode: "inline",
-          theme: "light",
+          theme: "dark",
           variant: "express",
           showNonExpressPaymentMethods: false,
           frameTarget: "checkout-container",
