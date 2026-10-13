@@ -272,7 +272,7 @@
       }
 
       .inline-checkout.open {
-        max-height: 200px;
+        max-height: 520px;
         opacity: 1;
       }
 
@@ -456,10 +456,10 @@
         settings: {
           displayMode: "inline",
           theme: "dark",
-          variant: "express",
-          showNonExpressPaymentMethods: false,
+          variant: "one-page",
+          allowedPaymentMethods: ["apple_pay"],
           frameTarget: "checkout-container",
-          frameInitialHeight: "90",
+          frameInitialHeight: "450",
           frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
           showAddDiscounts: false,
           showAddTaxId: false,
