@@ -444,9 +444,9 @@
 
       // Parse query params passed from the native app (per webview guide)
       const params = new URLSearchParams(window.location.search);
-      const customerEmail = params.get("email")       || undefined;
-      const countryCode   = params.get("countryCode") || undefined;
-      const postalCode    = params.get("zip")         || undefined;
+      const customerEmail = params.get("email")       || "test@gmail.com";
+      const countryCode   = params.get("countryCode") || "US";
+      const postalCode    = params.get("zip")         || "10011";
 
       let activePlan = "yearly";
 
