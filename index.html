@@ -49,6 +49,36 @@
         fill: none;
       }
 
+      /* ---- Variant toggle ---- */
+      .variant-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 20;
+        display: flex;
+        gap: 4px;
+        background: rgba(0, 0, 0, 0.22);
+        border-radius: 20px;
+        padding: 4px;
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 12.5px;
+        font-weight: 600;
+        font-family: inherit;
+        padding: 6px 12px;
+        border-radius: 16px;
+        cursor: pointer;
+      }
+
+      .toggle-btn.selected {
+        background: #fff;
+        color: #1c1c1e;
+      }
+
       /* ---- Page layout ---- */
       .paywall {
         max-width: 430px;
@@ -295,6 +325,12 @@
       <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
 
+    <!-- Variant toggle -->
+    <div class="variant-toggle">
+      <button class="toggle-btn" id="toggle-one-page" onclick="setVariant('one-page')">One-page</button>
+      <button class="toggle-btn selected" id="toggle-express" onclick="setVariant('express')">Express</button>
+    </div>
+
     <!-- Paywall content -->
     <div class="paywall">
 
@@ -449,35 +485,49 @@
       const postalCode    = params.get("zip")         || "10011";
 
       let activePlan = "yearly";
+      let activeVariant = "express";
 
-      // Pre-load checkout immediately so it's ready when the user taps a plan
-      const preloadOptions = {
-        items: [{ priceId: PLANS.yearly.priceId, quantity: 1 }],
-        settings: {
+      function buildSettings(variant) {
+        const settings = {
           displayMode: "inline",
           theme: "dark",
-          variant: "express",
-          // allowedPaymentMethods: ["apple_pay"],
+          variant: variant,
           frameTarget: "checkout-container",
           frameInitialHeight: "450",
           frameStyle: "width: 100%; min-width: 312px; background-color: transparent; border: none;",
           showAddDiscounts: false,
           showAddTaxId: false,
           allowLogout: false,
-        },
-      };
-
-      if (customerEmail || countryCode || postalCode) {
-        preloadOptions.customer = {};
-        if (customerEmail) preloadOptions.customer.email = customerEmail;
-        if (countryCode || postalCode) {
-          preloadOptions.customer.address = {};
-          if (countryCode) preloadOptions.customer.address.countryCode = countryCode;
-          if (postalCode)  preloadOptions.customer.address.postalCode  = postalCode;
+        };
+        if (variant === "express") {
+          settings.showNonExpressPaymentMethods = false;
+        } else {
+          settings.allowedPaymentMethods = ["apple_pay"];
         }
+        return settings;
       }
 
-      Paddle.Checkout.open(preloadOptions);
+      function openCheckout(variant, plan) {
+        const options = {
+          items: [{ priceId: PLANS[plan].priceId, quantity: 1 }],
+          settings: buildSettings(variant),
+        };
+
+        if (customerEmail || countryCode || postalCode) {
+          options.customer = {};
+          if (customerEmail) options.customer.email = customerEmail;
+          if (countryCode || postalCode) {
+            options.customer.address = {};
+            if (countryCode) options.customer.address.countryCode = countryCode;
+            if (postalCode)  options.customer.address.postalCode  = postalCode;
+          }
+        }
+
+        Paddle.Checkout.open(options);
+      }
+
+      // Pre-load checkout immediately so it's ready when the user taps a plan
+      openCheckout(activeVariant, activePlan);
 
       function selectPlan(plan) {
         activePlan = plan;
@@ -485,6 +535,14 @@
         document.getElementById("plan-monthly").classList.toggle("selected", plan === "monthly");
         Paddle.Checkout.updateItems([{ priceId: PLANS[plan].priceId, quantity: 1 }]);
         document.getElementById("checkout-panel").classList.add("open");
+      }
+
+      function setVariant(variant) {
+        if (variant === activeVariant) return;
+        activeVariant = variant;
+        document.getElementById("toggle-one-page").classList.toggle("selected", variant === "one-page");
+        document.getElementById("toggle-express").classList.toggle("selected", variant === "express");
+        openCheckout(activeVariant, activePlan);
       }
 
       function closeSheet() {
