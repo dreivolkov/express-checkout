@@ -513,7 +513,7 @@
           settings: buildSettings(variant),
         };
 
-        if (customerEmail || countryCode || postalCode) {
+        if (variant === "one-page" && (customerEmail || countryCode || postalCode)) {
           options.customer = {};
           if (customerEmail) options.customer.email = customerEmail;
           if (countryCode || postalCode) {
