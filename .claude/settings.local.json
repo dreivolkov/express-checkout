@@ -5,7 +5,22 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "WebSearch",
-      "WebFetch(domain:developer.paddle.com)"
+      "WebFetch(domain:developer.paddle.com)",
+      "Bash(/usr/bin/git status *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(git fetch *)",
+      "Bash(md5 index.html)",
+      "Bash(md5 /Users/volkovandrei/Desktop/checkout-demo-git/index.html)",
+      "Bash(python3 -c \"import http.server\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx -v)",
+      "Bash(git config *)",
+      "Bash(security find-internet-password *)",
+      "Bash(gh auth *)",
+      "mcp__paddle-sandbox__get_price",
+      "mcp__paddle-sandbox__create_price",
+      "Bash(git diff *)",
+      "Read(//tmp/**)"
     ]
   }
 }
