@@ -255,48 +255,15 @@
         fill: none;
       }
 
-      /* ---- CTA ---- */
-      .cta-button {
-        appearance: none;
-        border: none;
-        width: 100%;
-        background: #1c1c1e;
-        color: #fff;
-        font-family: inherit;
-        font-size: 17px;
-        font-weight: 700;
-        padding: 18px;
-        border-radius: 999px;
-        cursor: pointer;
-        margin-bottom: 14px;
-      }
-
-      .cta-button:active {
-        opacity: 0.85;
-      }
-
       .fine-print {
         text-align: center;
         font-size: 13px;
         color: #9a9aa0;
-        margin-bottom: 4px;
+        margin-bottom: 14px;
       }
 
-      /* ---- Inline checkout (reveals below CTA) ---- */
-      .inline-checkout {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transition: max-height 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.24s ease, margin-top 0.32s ease;
-      }
-
-      .inline-checkout.open {
-        max-height: 260px;
-        opacity: 1;
-        margin-top: 18px;
-      }
-
-      .inline-checkout-inner {
+      /* ---- Checkout (loaded on page load) ---- */
+      .checkout-card {
         background: #f7f7f8;
         border: 1px solid #e5e5ea;
         border-radius: 16px;
@@ -383,15 +350,10 @@
         No Payment Due Now
       </div>
 
-      <!-- CTA -->
-      <button class="cta-button" id="cta-button" onclick="startCheckout()">Start Your FREE Week</button>
+      <!-- Checkout -->
       <p class="fine-print" id="fine-print">Free for 7 days, then $39.99 per year ($3.33/mo)</p>
-
-      <!-- Inline checkout (reveals below CTA) -->
-      <div class="inline-checkout" id="checkout-panel">
-        <div class="inline-checkout-inner">
-          <div id="checkout-container" class="checkout-container"></div>
-        </div>
+      <div class="checkout-card">
+        <div id="checkout-container" class="checkout-container"></div>
       </div>
 
     </div>
@@ -411,14 +373,7 @@
       };
 
       Paddle.Environment.set("sandbox");
-      Paddle.Initialize({
-        token: PADDLE_TOKEN,
-        eventCallback: (event) => {
-          if (event.name === "checkout.completed") {
-            closePanel();
-          }
-        },
-      });
+      Paddle.Initialize({ token: PADDLE_TOKEN });
 
       // Parse query params passed in from the native app webview, if any
       const params = new URLSearchParams(window.location.search);
@@ -427,7 +382,6 @@
       const postalCode = params.get("zip") || undefined;
 
       let activePlan = "yearly";
-      let checkoutPreloaded = false;
 
       function buildCustomer() {
         if (!customerEmail && !countryCode && !postalCode) return undefined;
@@ -441,51 +395,34 @@
         return customer;
       }
 
-      function preloadCheckout() {
-        if (checkoutPreloaded) return;
-        checkoutPreloaded = true;
+      // Load the checkout immediately so the Apple Pay button is ready on page load
+      const checkoutOptions = {
+        items: [{ priceId: PLANS[activePlan].priceId, quantity: 1 }],
+        settings: {
+          displayMode: "inline",
+          theme: "light",
+          variant: "express",
+          showNonExpressPaymentMethods: false,
+          frameTarget: "checkout-container",
+          frameInitialHeight: "90",
+          frameStyle: "width: 100%; min-width: 280px; background-color: transparent; border: none;",
+          showAddDiscounts: false,
+          showAddTaxId: false,
+          allowLogout: false,
+        },
+      };
 
-        const options = {
-          items: [{ priceId: PLANS[activePlan].priceId, quantity: 1 }],
-          settings: {
-            displayMode: "inline",
-            theme: "light",
-            variant: "express",
-            showNonExpressPaymentMethods: false,
-            frameTarget: "checkout-container",
-            frameInitialHeight: "90",
-            frameStyle: "width: 100%; min-width: 280px; background-color: transparent; border: none;",
-            showAddDiscounts: false,
-            showAddTaxId: false,
-            allowLogout: false,
-          },
-        };
+      const checkoutCustomer = buildCustomer();
+      if (checkoutCustomer) checkoutOptions.customer = checkoutCustomer;
 
-        const customer = buildCustomer();
-        if (customer) options.customer = customer;
-
-        Paddle.Checkout.open(options);
-      }
+      Paddle.Checkout.open(checkoutOptions);
 
       function selectPlan(plan) {
         activePlan = plan;
         document.getElementById("plan-monthly").classList.toggle("selected", plan === "monthly");
         document.getElementById("plan-yearly").classList.toggle("selected", plan === "yearly");
         document.getElementById("fine-print").textContent = PLANS[plan].finePrint;
-
-        if (checkoutPreloaded) {
-          Paddle.Checkout.updateItems([{ priceId: PLANS[plan].priceId, quantity: 1 }]);
-        }
-      }
-
-      function startCheckout() {
-        preloadCheckout();
-        document.getElementById("checkout-panel").classList.add("open");
-        document.getElementById("checkout-panel").scrollIntoView({ behavior: "smooth", block: "end" });
-      }
-
-      function closePanel() {
-        document.getElementById("checkout-panel").classList.remove("open");
+        Paddle.Checkout.updateItems([{ priceId: PLANS[plan].priceId, quantity: 1 }]);
       }
 
       function restorePurchases() {
