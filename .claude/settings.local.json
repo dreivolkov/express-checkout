@@ -20,7 +20,8 @@
       "mcp__paddle-sandbox__get_price",
       "mcp__paddle-sandbox__create_price",
       "Bash(git diff *)",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(git status *)"
     ]
   }
 }
