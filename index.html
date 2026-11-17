@@ -708,6 +708,7 @@
       // Pre-load the express checkout so it's ready the moment the CTA is tapped
       Paddle.Checkout.open({
         items: [{ priceId: PRICES[activePlan].priceId, quantity: 1 }],
+        discountId: "dsc_01m7nnw2wejj54x92vsb8wrsn8",
         settings: {
           displayMode: "inline",
           theme: "light",
@@ -734,6 +735,7 @@
         if (expressOpened) return;
         Paddle.Checkout.open({
           items: [{ priceId: PRICES.yearly.priceId, quantity: 1 }],
+          discountId: "dsc_01m7nnw2wejj54x92vsb8wrsn8",
           settings: {
             displayMode: "inline",
             theme: "light",
